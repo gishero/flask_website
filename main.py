@@ -1,9 +1,11 @@
-from operator import truediv
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from datetime import time, timedelta
 from flask_sqlalchemy import SQLAlchemy
 
+# from admin.second import second
+
 app = Flask(__name__)
+# app.register_blueprint(second, url_prefix="/admin")
 app.secret_key = "a;lsdkjf;alskdjf;alskdjf;alsdjf"
 app.permanent_session_lifetime = timedelta(minutes=5)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///logins.sqlite3"
@@ -23,19 +25,15 @@ class members(db.Model):
 
 
 @app.route("/")  # this sets the route to this page
+@app.route("/home/")
 # Defining the home page of our site
-def home():
-    return render_template("index.html")
+def index():
+    return render_template("home.html")
 
 
-# @app.route("/<name>/")
-# def user(name):
-#     return f"Hello {name}!"
-
-
-@app.route("/test/")
-def test():
-    return render_template("test.html")
+# @app.route("/test/")
+# def test():
+#     return render_template("test.html")
 
 
 @app.route("/login/", methods=["POST", "GET"])
@@ -44,6 +42,15 @@ def login():
         session.permanent = True
         user = request.form["nm"]
         session["user"] = user
+
+        found_user = members.query.filter_by(name=user).first()
+        if found_user:
+            session["email"] = found_user.email
+        else:
+            user_name = members(user, "")
+            db.session.add(user_name)
+            db.session.commit()
+
         flash("Login Successful", "info")
         return redirect(url_for("user"))
     else:
@@ -67,6 +74,9 @@ def user():
         if request.method == "POST":
             email = request.form["email"]
             session["email"] = email
+            found_user = members.query.filter_by(name=user).first()
+            found_user.email = email
+            db.session.commit()
             flash("Email saved", "info")
         else:
             if "email" in session:
@@ -87,6 +97,12 @@ def logout():
 
     flash("Logged out", "info")
     return redirect(url_for("login"))
+
+
+@app.route("/view/")
+def view():
+    return render_template("view.html", values=members.query.all())
+    # return "<h1>Hello</h1>"
 
 
 if __name__ == "__main__":
