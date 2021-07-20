@@ -1,4 +1,5 @@
 .vscode
 flask_python
 logins.sqlite3
+database.db
 __pycache__

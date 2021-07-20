@@ -1,9 +1,0 @@
-{% extends "template.html" %} {% block title%} Index Page {% endblock %} {%
-block content %}
-<h1>This is the index page</h1>
-<link
-  rel="stylesheet"
-  href="{{url_for('static', filename='/styles/style.css')}}"
-/>
-<img src="{{url_for('static', filename='/images/profile_pic.jpg')}}" />
-{% endblock %}
